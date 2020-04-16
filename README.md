@@ -108,6 +108,32 @@ console.log(hello_world);
 // }
 ```
 
+### client
+
+type: string
+
+a path to a js file to be your client
+
+in webpack.config.js add:
+
+```js
+options: {
+  client: require.resolve("./myClient");
+}
+```
+
+in myClient.js:
+
+```js
+// the url is the url of the gql server
+module.exports = (url) => {
+  return (query, vars, opts) => {
+    // ...your code
+    // NOTE: you must return a promise
+  };
+};
+```
+
 ## Licence
 
 copyright (c) AliBasicCoder 2020

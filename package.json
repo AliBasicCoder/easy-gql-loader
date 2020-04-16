@@ -8,6 +8,7 @@
     "url": "git+https://github.com/AliBasicCoder/easy-gql-loader"
   },
   "scripts": {
+    "build": "tsc src/index.ts --outDir dist",
     "test": "mocha-parallel-tests -t 25000 -r ts-node/register ./test/test.ts"
   },
   "homepage": "https://github.com/AliBasicCoder/easy-gql-loader",
