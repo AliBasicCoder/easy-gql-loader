@@ -3,6 +3,17 @@
   "version": "1.0.0",
   "main": "dist/index.js",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AliBasicCoder/easy-gql-loader"
+  },
+  "homepage": "https://github.com/AliBasicCoder/easy-gql-loader",
+  "keywords": [
+    "gql",
+    "graphql",
+    "webpack",
+    "loader"
+  ],
   "devDependencies": {
     "@types/lodash": "^4.14.149",
     "apollo-server": "^2.12.0",
