@@ -1,0 +1,21 @@
+{
+  "name": "easy-gql-loader",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/lodash": "^4.14.149",
+    "apollo-server": "^2.12.0",
+    "lodash": "^4.17.15",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
+  },
+  "dependencies": {
+    "@types/webpack": "^4.41.11",
+    "fs-pro": "^2.3.4",
+    "gql-bin": "^1.0.2",
+    "graphql": "^15.0.0",
+    "graphql-fetch": "^1.0.1",
+    "subscriptions-transport-ws": "^0.9.16"
+  }
+}

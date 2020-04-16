@@ -1,0 +1,5 @@
+fragment BookFields on Book {
+  name
+  writtenAt
+  id
+}

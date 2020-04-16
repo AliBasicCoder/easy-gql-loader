@@ -1,0 +1,25 @@
+#import "./some.gql"
+
+query book($id: ID) {
+  book(id: $id) {
+    ...BookFields
+  }
+}
+
+mutation book($id: ID, $newBook: BookInputPartial) {
+  book(id: $id, newBook: $newBook) {
+    ...BookFields
+  }
+}
+
+mutation addBook($newBook: BookInput) {
+  addBook(newBook: $newBook) {
+    ...BookFields
+  }
+}
+
+subscription bookAdded {
+  bookAdded {
+    ...BookFields
+  }
+}
