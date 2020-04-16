@@ -9,7 +9,8 @@
   },
   "scripts": {
     "build": "tsc src/index.ts --outDir dist",
-    "test": "mocha-parallel-tests -t 25000 -r ts-node/register ./test/test.ts"
+    "test": "mocha-parallel-tests -t 25000 -r ts-node/register ./test/test.ts",
+    "prepublishOnly": "yarn build"
   },
   "homepage": "https://github.com/AliBasicCoder/easy-gql-loader",
   "keywords": [
