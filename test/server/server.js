@@ -1,11 +1,14 @@
-import lodash from "lodash";
-import { gql, ApolloServer, PubSub } from "apollo-server";
+const lodash = require("lodash");
+const { gql, ApolloServer, PubSub } = require("apollo-server");
+const books = require("./books");
+
+const log = process.argv[2] === "--run" ? console.log : () => {};
 
 const BOOK_ADDED = "BOOK_ADDED";
 
 const pubSub = new PubSub();
 
-const typeDefs = gql`
+let typeDefs = `
   type Book {
     name: String!
     writtenAt: String!
@@ -36,41 +39,30 @@ const typeDefs = gql`
   }
 `;
 
-type ID = string | number;
-
-type Book = {
-  name: string;
-  writtenAt: string;
-  id: ID;
-};
-
-export const resolvers = {
+const resolvers = {
   Subscription: {
     bookAdded: {
       subscribe: () => pubSub.asyncIterator([BOOK_ADDED]),
     },
   },
   Query: {
-    book(_: any, { id }: { id: string }) {
-      console.log("book_q", id);
+    book(_1, { id }) {
+      log("book_q", id);
       return lodash.find(books, { id });
     },
   },
   Mutation: {
-    book(_: any, { id, newBook }: { id: string; newBook: Partial<Book> }) {
-      console.log("book_m", { id, newBook });
+    book(_1, { id, newBook }) {
+      log("book_m", { id, newBook });
       const index = lodash.findIndex(books, { id });
       books[index] = lodash.defaults(newBook, books[index]);
       return books[index];
     },
-    addBook(
-      _: any,
-      { newBook }: { newBook: { name: string; writtenAt: string } }
-    ) {
-      console.log("addBook_m", newBook);
-      const obj: Book = {
+    addBook(_1, { newBook }) {
+      log("addBook_m", newBook);
+      const obj = {
         ...newBook,
-        id: `${newBook.name}_${Math.random().toString().slice(2)}`,
+        id: `${newBook.name}_1290`,
       };
       pubSub.publish(BOOK_ADDED, { bookAdded: obj });
       books.push(obj);
@@ -79,27 +71,11 @@ export const resolvers = {
   },
 };
 
-const books: Book[] = [
-  {
-    name: "book1",
-    writtenAt: "1586629931516",
-    id: "book1_1000",
-  },
-  {
-    name: "book2",
-    writtenAt: "1586629931516",
-    id: "book2_1534",
-  },
-  {
-    name: "book3",
-    writtenAt: "1586629931516",
-    id: "book3_1290",
-  },
-];
-
-const apolloServer = new ApolloServer({ typeDefs, resolvers, cors: true });
-
 if (process.argv[2] === "--run") {
+  const apolloServer = new ApolloServer({ typeDefs, resolvers, cors: true });
+  typeDefs = gql(typeDefs);
   apolloServer.listen(4000);
   console.log("server ran at http://localhost:4000/");
 }
+
+module.exports = { typeDefs, resolvers };

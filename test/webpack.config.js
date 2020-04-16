@@ -16,6 +16,7 @@ module.exports = {
           loader: "../",
           options: {
             url: "http://localhost:4000",
+            client: require.resolve("./server/client"),
             // webSocketEndPoint: "ws://localhost:4000/graphql",
             // flat: true,
           },

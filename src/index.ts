@@ -137,10 +137,11 @@ export function stringify(
     url: string;
     webSocketEndPoint: string;
     flat: boolean;
+    client: string;
   }
 ) {
-  const { url, webSocketEndPoint, flat } = opts;
-  let str = `var graphqlFetch = require('graphql-fetch')('${url}');
+  const { url, webSocketEndPoint, flat, client } = opts;
+  let str = `var graphqlFetch = require('${client}')('${url}');
 var queries = {};
 var mutations = {};
 var subscriptions = {};
@@ -197,6 +198,7 @@ function loader(this: webpackLoader.LoaderContext) {
     {
       url: "/graphql",
       flat: false,
+      client: "graphql-fetch",
     },
     this.loaders[this.loaderIndex].options || {}
   );
