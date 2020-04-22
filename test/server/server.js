@@ -1,6 +1,6 @@
 const lodash = require("lodash");
 const { gql, ApolloServer, PubSub } = require("apollo-server");
-const books = require("./books");
+const { books, authors } = require("./data");
 
 const log = process.argv[2] === "--run" ? console.log : () => {};
 
@@ -13,6 +13,12 @@ let typeDefs = `
     name: String!
     writtenAt: String!
     id: ID!
+    author: Author!
+  }
+
+  type Author {
+    name: String!
+    born: String!
   }
 
   input BookInputPartial {

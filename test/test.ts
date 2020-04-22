@@ -12,7 +12,9 @@ describe("main", () => {
   });
 
   it("works", async () => {
-    const books = require("./server/books");
+    const log = (obj: any) => obj.errors && console.log(obj);
+
+    const { books } = require("./server/data");
     const obj = require("./out");
     // have right data
     assert.notEqual(typeof obj.data, "undefined");
@@ -20,38 +22,40 @@ describe("main", () => {
     assert.notEqual(typeof obj.data.mutations, "undefined");
     assert.notEqual(typeof obj.data.subscriptions, "undefined");
     // actually works
-    assert.deepEqual(
-      (await obj.data.queries.book({ id: "book1_1000" })).data.book,
-      books[0]
-    );
-    assert.deepEqual(
-      (
-        await obj.data.mutations.book({
-          id: "book1_1000",
-          newBook: {
-            name: "hello",
-          },
-        })
-      ).data.book,
-      {
-        ...books[0],
+    let op: any = await obj.data.queries.book({ id: "book1_1000" });
+
+    log(op);
+
+    assert.deepEqual(op.data.book, books[0]);
+
+    op = await obj.data.mutations.book({
+      id: "book1_1000",
+      newBook: {
         name: "hello",
-      }
-    );
-    assert.deepEqual(
-      (
-        await obj.data.mutations.addBook({
-          newBook: {
-            name: "hello_world",
-            writtenAt: "1290",
-          },
-        })
-      ).data.addBook,
-      {
+      },
+    });
+
+    log(op);
+
+    assert.deepEqual(op.data.book, {
+      ...books[0],
+      author: undefined,
+      name: "hello",
+    });
+
+    op = await obj.data.mutations.addBook({
+      newBook: {
         name: "hello_world",
         writtenAt: "1290",
-        id: "hello_world_1290",
-      }
-    );
+      },
+    });
+
+    log(op);
+
+    assert.deepEqual(op.data.addBook, {
+      name: "hello_world",
+      writtenAt: "1290",
+      id: "hello_world_1290",
+    });
   });
 });

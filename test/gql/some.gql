@@ -1,5 +1,13 @@
+fragment AuthorFields on Author {
+  name
+  born
+}
+
 fragment BookFields on Book {
   name
   writtenAt
   id
+  author {
+    ...AuthorFields
+  }
 }
