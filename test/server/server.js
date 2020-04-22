@@ -1,6 +1,6 @@
 const lodash = require("lodash");
 const { gql, ApolloServer, PubSub } = require("apollo-server");
-const { books, authors } = require("./data");
+const { books, author } = require("./data");
 
 const log = process.argv[2] === "--run" ? console.log : () => {};
 
@@ -68,6 +68,7 @@ const resolvers = {
       log("addBook_m", newBook);
       const obj = {
         ...newBook,
+        author,
         id: `${newBook.name}_1290`,
       };
       pubSub.publish(BOOK_ADDED, { bookAdded: obj });

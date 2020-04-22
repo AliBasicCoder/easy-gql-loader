@@ -15,10 +15,7 @@ function exec(
 }
 
 const regexs = {
-  queryOrMutation: /(query|mutation)[ ]+(\w+)([^]+)/g,
-  inputOrType: /(input|type)[ ]+(\w+)[ ]*\{([^}]+)\}/g,
   imports: /\#import[ ]+("|')([\w\/.]+)\1/g,
-  fragments: /fragment[ ]+(\w+)[ ]+on[ ]+(\w+)\{([^]+)\}/,
 };
 
 type obj<T> = {
@@ -31,15 +28,15 @@ type dataObject = {
   fragments: obj<string>;
   queries: obj<{
     base?: string;
-    neededFragments?: string;
+    neededFragments?: string[];
   }>;
   mutations: obj<{
     base?: string;
-    neededFragments?: string;
+    neededFragments?: string[];
   }>;
   subscriptions: obj<{
     base?: string;
-    neededFragments?: string;
+    neededFragments?: string[];
   }>;
   file: {
     name: string;
@@ -114,16 +111,22 @@ export function mainParser(
     }
   }
 
+  function getFragments(str: string) {
+    const resArr: string[] = [];
+    exec(str, /\.\.\.(\w+)/g, (arr) => {
+      resArr.push(arr[1]);
+      resArr.push(...getFragments(dataObj.fragments[arr[1]]));
+    });
+    return resArr;
+  }
+
   ["mutations", "queries", "subscriptions"].forEach(
     // @ts-ignore
     (key: "mutations" | "queries" | "subscriptions") => {
       for (const objKey in dataObj[key]) {
-        const elem = dataObj[key][objKey];
-        if (!elem.base) continue;
-        elem.neededFragments = elem.neededFragments || "";
-        exec(elem.base, /\.\.\.(\w+)/g, (arr) => {
-          elem.neededFragments += dataObj.fragments[arr[1]];
-        });
+        const { base } = dataObj[key][objKey];
+        if (!base) continue;
+        dataObj[key][objKey].neededFragments = getFragments(base);
       }
     }
   );
@@ -145,6 +148,7 @@ export function stringify(
 var queries = {};
 var mutations = {};
 var subscriptions = {};
+var parsedData = ${JSON.stringify(parsedData)};
   `;
   if (webSocketEndPoint) {
     str += `
@@ -156,12 +160,14 @@ var swClient = new swServer("${webSocketEndPoint}", {
     `;
     for (const objKey in parsedData.subscriptions) {
       const elem = parsedData.subscriptions[objKey];
-      if (!elem.base) continue;
-      elem.neededFragments = elem.neededFragments || "";
+      if (!elem.base || !elem.neededFragments) continue;
       str += `
 subscriptions["${objKey}"] = function(queryVars){
+  var str = "";
+  str += parsedData.subscriptions["${objKey}"].neededFragments.map(function(key){ return parsedData.fragments[key] });
+  str += parsedData.subscriptions["${objKey}"].base;
   return swClient.request({
-    query: "${(elem.neededFragments + elem.base).replace(/\n/g, "\\n")}",
+    query: str,
     variables: queryVars
   })
 }`;
@@ -173,14 +179,13 @@ subscriptions["${objKey}"] = function(queryVars){
     (key: "mutations" | "queries") => {
       for (const objKey in parsedData[key]) {
         const elem = parsedData[key][objKey];
-        if (!elem.base) continue;
-        elem.neededFragments = elem.neededFragments || "";
+        if (!elem.base || !elem.neededFragments) continue;
         str += `
 ${key}["${objKey}"] = function(queryVars, opts){
-  return graphqlFetch("${(elem.neededFragments + elem.base).replace(
-    /\n/g,
-    "\\n"
-  )}", queryVars, opts)
+  var str = "";
+  str += parsedData["${key}"]["${objKey}"].neededFragments.map(function(key){ return parsedData.fragments[key] });
+  str += parsedData["${key}"]["${objKey}"].base;
+  return graphqlFetch(str, queryVars, opts)
 }\n`;
       }
     }

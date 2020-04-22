@@ -14,7 +14,7 @@ describe("main", () => {
   it("works", async () => {
     const log = (obj: any) => obj.errors && console.log(obj);
 
-    const { books } = require("./server/data");
+    const { books, author } = require("./server/data");
     const obj = require("./out");
     // have right data
     assert.notEqual(typeof obj.data, "undefined");
@@ -39,7 +39,6 @@ describe("main", () => {
 
     assert.deepEqual(op.data.book, {
       ...books[0],
-      author: undefined,
       name: "hello",
     });
 
@@ -56,6 +55,7 @@ describe("main", () => {
       name: "hello_world",
       writtenAt: "1290",
       id: "hello_world_1290",
+      author,
     });
   });
 });
