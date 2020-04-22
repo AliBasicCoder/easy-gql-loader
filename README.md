@@ -122,12 +122,40 @@ options: {
 }
 ```
 
+the type of a client function
+
+```ts
+type Config = { url: string; webSocketEndPoint: string };
+type ClientFunction = (
+  config: Config
+) => (
+  type: "query" | "mutation" | "subscription",
+  query: string,
+  vars: any,
+  opts: any
+) => any;
+```
+
 in myClient.js:
 
 ```js
-// the url is the url of the gql server
-module.exports = (url) => {
-  return (query, vars, opts) => {
+module.exports = (config) => {
+  const {
+    // the url is the url of the gql server
+    url,
+    // the websocket url to use for subscriptions
+    webSocketEndPoint,
+  } = config;
+  // type is the type of the operation
+  // query is the query needed for the operation
+  // vars is the query variables
+  // opts is options
+  return (
+    type: "query" | "mutation" | "subscription",
+    query: string,
+    vars: any,
+    opts: any
+  ) => {
     // ...your code
     // NOTE: you must return a promise
   };

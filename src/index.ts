@@ -1,6 +1,6 @@
 import { loader as webpackLoader } from "webpack";
 import { parse } from "graphql/language";
-import { isAbsolute } from "path";
+import { isAbsolute, join } from "path";
 import { File } from "fs-pro";
 
 function exec(
@@ -144,50 +144,31 @@ export function stringify(
   }
 ) {
   const { url, webSocketEndPoint, flat, client } = opts;
-  let str = `var graphqlFetch = require('${client}')('${url}');
+  const config = JSON.stringify({ url, webSocketEndPoint });
+  let str = `var client = require('${client}')(${config});
 var queries = {};
 var mutations = {};
 var subscriptions = {};
 var parsedData = ${JSON.stringify(parsedData)};
   `;
-  if (webSocketEndPoint) {
-    str += `
-try {
-var swServer = require('subscriptions-transport-ws').SubscriptionClient;\n 
-var swClient = new swServer("${webSocketEndPoint}", {
-  reconnect: true
-})
-    `;
-    for (const objKey in parsedData.subscriptions) {
-      const elem = parsedData.subscriptions[objKey];
-      if (!elem.base || !elem.neededFragments) continue;
-      str += `
-subscriptions["${objKey}"] = function(queryVars){
-  var str = "";
-  str += parsedData.subscriptions["${objKey}"].neededFragments.map(function(key){ return parsedData.fragments[key] });
-  str += parsedData.subscriptions["${objKey}"].base;
-  return swClient.request({
-    query: str,
-    variables: queryVars
-  })
-}`;
-    }
-    str += `} catch(err) { console.log(err); }`;
-  }
-  ["mutations", "queries"].forEach(
+  ["mutations", "queries", "subscriptions"].forEach(
     // @ts-ignore
-    (key: "mutations" | "queries") => {
+    (key: "mutations" | "queries" | "subscriptions") => {
+      str += "try {\n";
       for (const objKey in parsedData[key]) {
         const elem = parsedData[key][objKey];
         if (!elem.base || !elem.neededFragments) continue;
         str += `
-${key}["${objKey}"] = function(queryVars, opts){
-  var str = "";
-  str += parsedData["${key}"]["${objKey}"].neededFragments.map(function(key){ return parsedData.fragments[key] });
-  str += parsedData["${key}"]["${objKey}"].base;
-  return graphqlFetch(str, queryVars, opts)
+${key}["${objKey}"] = function(vars, opts){
+  var query = "";
+  query += parsedData["${key}"]["${objKey}"].neededFragments.map(function(key){ return parsedData.fragments[key] });
+  query += parsedData["${key}"]["${objKey}"].base;
+  return client("${
+    key === "queries" ? "query" : key.slice(0, -1)
+  }", query, vars, opts)
 }\n`;
       }
+      str += `} catch(err) { console.log(err); }`;
     }
   );
   if (flat)
@@ -203,7 +184,7 @@ function loader(this: webpackLoader.LoaderContext) {
     {
       url: "/graphql",
       flat: false,
-      client: "graphql-fetch",
+      client: join(__dirname, "../src/defaultClient"),
     },
     this.loaders[this.loaderIndex].options || {}
   );
