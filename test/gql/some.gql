@@ -10,4 +10,7 @@ fragment BookFields on Book {
   author {
     ...AuthorFields
   }
+  author2 {
+    ...AuthorFields
+  }
 }

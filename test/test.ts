@@ -56,6 +56,7 @@ describe("main", () => {
       writtenAt: "1290",
       id: "hello_world_1290",
       author,
+      author2: author,
     });
   });
 });

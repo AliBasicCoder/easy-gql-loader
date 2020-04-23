@@ -113,8 +113,11 @@ export function mainParser(
 
   function getFragments(str: string) {
     const resArr: string[] = [];
+    const includedFragments: obj<1> = {};
     exec(str, /\.\.\.(\w+)/g, (arr) => {
+      if (includedFragments[arr[1]]) return;
       resArr.push(arr[1]);
+      includedFragments[arr[1]] = 1;
       resArr.push(...getFragments(dataObj.fragments[arr[1]]));
     });
     return resArr;

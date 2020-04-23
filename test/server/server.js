@@ -14,6 +14,7 @@ let typeDefs = `
     writtenAt: String!
     id: ID!
     author: Author!
+    author2: Author!
   }
 
   type Author {
@@ -69,6 +70,7 @@ const resolvers = {
       const obj = {
         ...newBook,
         author,
+        author2: author,
         id: `${newBook.name}_1290`,
       };
       pubSub.publish(BOOK_ADDED, { bookAdded: obj });
