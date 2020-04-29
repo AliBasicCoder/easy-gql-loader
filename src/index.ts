@@ -153,25 +153,24 @@ var queries = {};
 var mutations = {};
 var subscriptions = {};
 var parsedData = ${JSON.stringify(parsedData)};
+function request(key, objKey, type, vars, opts){
+  var query = "";
+  query += parsedData[key][objKey].neededFragments.map(function(key){ return parsedData.fragments[key] });
+  query += parsedData[key][objKey].base;
+  return client(type, query, vars, opts)
+}
   `;
   ["mutations", "queries", "subscriptions"].forEach(
     // @ts-ignore
     (key: "mutations" | "queries" | "subscriptions") => {
-      str += "try {\n";
       for (const objKey in parsedData[key]) {
         const elem = parsedData[key][objKey];
         if (!elem.base || !elem.neededFragments) continue;
         str += `
-${key}["${objKey}"] = function(vars, opts){
-  var query = "";
-  query += parsedData["${key}"]["${objKey}"].neededFragments.map(function(key){ return parsedData.fragments[key] });
-  query += parsedData["${key}"]["${objKey}"].base;
-  return client("${
-    key === "queries" ? "query" : key.slice(0, -1)
-  }", query, vars, opts)
-}\n`;
+${key}["${objKey}"] = function(vars, opts){ return request("${key}", "${objKey}", ${
+          key === "queries" ? "query" : key.slice(0, -1)
+        }, vars, opts) }`;
       }
-      str += `} catch(err) { console.log(err); }`;
     }
   );
   if (flat)
