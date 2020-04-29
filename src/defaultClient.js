@@ -1,4 +1,4 @@
-module.exports = (config) => {
+module.exports = function (config) {
   var graphqlFetch = require("graphql-fetch")(config.url);
   var swServer;
   var swClient;
@@ -8,7 +8,7 @@ module.exports = (config) => {
       reconnect: true,
     });
   }
-  return (type, query, vars, opts) => {
+  return function (type, query, vars, opts) {
     if (type === "subscription" && config.webSocketEndPoint) {
       return swClient.request({
         query: str,
