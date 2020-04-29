@@ -1,4 +1,4 @@
-// this webpack is for testing not building
+// this webpack config is for testing not building
 
 module.exports = {
   entry: "./toTest",
