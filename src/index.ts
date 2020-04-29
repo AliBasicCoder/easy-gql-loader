@@ -157,19 +157,17 @@ function request(key, objKey, type, vars, opts){
   var query = "";
   query += parsedData[key][objKey].neededFragments.map(function(key){ return parsedData.fragments[key] });
   query += parsedData[key][objKey].base;
-  return client(type, query, vars, opts)
-}
-  `;
+  return client(type, query, vars, opts);
+}\n`;
   ["mutations", "queries", "subscriptions"].forEach(
     // @ts-ignore
     (key: "mutations" | "queries" | "subscriptions") => {
       for (const objKey in parsedData[key]) {
         const elem = parsedData[key][objKey];
         if (!elem.base || !elem.neededFragments) continue;
-        str += `
-${key}["${objKey}"] = function(vars, opts){ return request("${key}", "${objKey}", ${
+        str += `${key}["${objKey}"] = function(vars, opts){ return request("${key}", "${objKey}", "${
           key === "queries" ? "query" : key.slice(0, -1)
-        }, vars, opts) }`;
+        }", vars, opts) }\n`;
       }
     }
   );
